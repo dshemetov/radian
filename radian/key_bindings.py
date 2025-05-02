@@ -1,5 +1,6 @@
 import re
 import os
+import shutil
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.application.run_in_terminal import run_in_terminal
@@ -334,7 +335,7 @@ def create_shell_key_bindings():
     return kb
 
 
-def create_key_bindings():
+def create_key_bindings(history_fzf_search=False):
     kb = KeyBindings()
     handle = kb.add
 
@@ -448,6 +449,41 @@ def create_key_bindings():
                 await run_in_terminal(cleanup, in_executor=True)
 
             get_app().create_background_task(run())
+
+    if history_fzf_search:
+        if not shutil.which('fzf'):
+            print("WARNING: fzf not found, please install fzf to use fuzzy search for history")
+            return kb
+        # A hacky way to get fuzzy search for history,
+        # activate with options("radian.history_fzf_search" = TRUE)
+        # - Just pass the whole history to fzf in a subprocess
+        # - I don't care about history search state
+        # - I prefer to handle duplicate filtering in the history file itself
+        # - Fast enough on my 85k line history
+        @handle('c-r', filter=insert_mode & default_focused)
+        def _(event):
+            app = get_radian_app()
+            history = app.session.history
+
+            def run_fzf():
+                try:
+                    import subprocess
+                    result = subprocess.run(
+                        ["fzf", "--ansi", "--read0"],
+                        input="\0".join(history.get_strings()),
+                        text=True,
+                        capture_output=True,
+                    )
+                    if result.returncode == 0:
+                        selected = result.stdout.strip()
+                        b = event.current_buffer
+                        b.insert_text(selected)
+                    else:
+                        nc.end_of_line(event)
+                except Exception as e:
+                    print(f"Error running fzf: {e}")
+
+            run_in_terminal(run_fzf)
 
     return kb
 

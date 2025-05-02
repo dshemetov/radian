@@ -52,6 +52,7 @@ class RadianSettings(object):
         self._load_setting("history_search_no_duplicates", False, bool)
         self._load_setting("history_search_ignore_case", False, bool)
         self._load_setting("history_ignore_browser_commands", True, bool)
+        self._load_setting("history_fzf_search", False, bool)
         self._load_setting("insert_new_line", True, bool)
         self._load_setting("indent_lines", True, bool)
         self._load_prompt()

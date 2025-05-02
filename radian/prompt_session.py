@@ -212,8 +212,8 @@ def create_radian_prompt_session(options, settings):
         lexer=PygmentsLexer(SLexer),
         tempfile_suffix=".R",
         input_processors=input_processors,
-        key_bindings=create_key_bindings(),
-        prompt_key_bindings=r_key_bindings
+        key_bindings=create_key_bindings(history_fzf_search=settings.history_fzf_search),
+        prompt_key_bindings=r_key_bindings,
     )
 
     browse_level = [""]
