@@ -469,7 +469,7 @@ def create_key_bindings(history_fzf_search=False):
                 try:
                     import subprocess
                     result = subprocess.run(
-                        ["fzf", "--ansi", "--read0"],
+                        ["fzf", "--ansi", "--read0", "--tac", "--no-sort"],
                         input="\0".join(history.get_strings()),
                         text=True,
                         capture_output=True,
